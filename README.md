@@ -5,6 +5,12 @@
 
 AWS IAM Policy Generator Component Library - Drop-in React components for AWS policy generation with ARN dropdown support and responsive design.
 
+## 🚀 Live Demo
+
+**[View Live Examples →](https://raccoonyy.github.io/awspirin-lib)**
+
+Try out all the features including ARN dropdown, dependency resolution, responsive layouts, and multi-language support in your browser.
+
 ## Features
 
 🚀 **Easy Integration** - Drop-in React components that work out of the box
