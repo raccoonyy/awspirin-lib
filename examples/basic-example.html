@@ -167,9 +167,9 @@
   <script type="text/babel">
     // Mock the PolicyGenerator component for demonstration
     function PolicyGenerator({ arnList = [], theme = 'light', layout = 'responsive', arnInputMode = 'auto', onChange }) {
-      const [selectedResource, setSelectedResource] = React.useState('');
-      const [selectedActions, setSelectedActions] = React.useState([]);
-      const [selectedArn, setSelectedArn] = React.useState('');
+      const [selectedResources, setSelectedResources] = React.useState([]);
+      const [resourceSelections, setResourceSelections] = React.useState({});
+      // resourceSelections structure: { resourceId: { actions: [], arn: '' } }
 
       const resources = [
         { id: 's3', name: 'S3 Bucket', service: 's3' },
@@ -213,56 +213,112 @@
       };
 
       React.useEffect(() => {
-        if (selectedActions.length > 0 && selectedArn) {
-          const resolvedActions = resolveDependencies(selectedActions, selectedResource);
-          const policy = {
-            Version: '2012-10-17',
-            Statement: [{
+        const statements = [];
+        const actionsWithoutArn = [];
+        
+        selectedResources.forEach(resourceId => {
+          const selection = resourceSelections[resourceId];
+          if (!selection || selection.actions.length === 0) return;
+          
+          const resolvedActions = resolveDependencies(selection.actions, resourceId);
+          
+          if (selection.arn) {
+            // Create separate statement for each ARN
+            statements.push({
               Effect: 'Allow',
               Action: resolvedActions,
-              Resource: selectedArn || '*'
-            }]
-          };
-          onChange?.(policy);
-        } else {
-          onChange?.({ Version: '2012-10-17', Statement: [] });
+              Resource: selection.arn
+            });
+          } else {
+            // Collect actions without ARN to group them
+            actionsWithoutArn.push(...resolvedActions);
+          }
+        });
+        
+        // Add grouped statement for actions without ARN
+        if (actionsWithoutArn.length > 0) {
+          statements.push({
+            Effect: 'Allow',
+            Action: [...new Set(actionsWithoutArn)].sort(),
+            Resource: '*'
+          });
         }
-      }, [selectedActions, selectedArn, selectedResource]);
-
-      const filteredArns = arnList.filter(arn => arn.service === selectedResource);
-      const showDropdown = (arnInputMode === 'dropdown' || arnInputMode === 'both' || 
-                           (arnInputMode === 'auto' && filteredArns.length > 0));
-      const showInput = (arnInputMode === 'input' || arnInputMode === 'both' || 
-                        (arnInputMode === 'auto' && filteredArns.length === 0));
+        
+        const policy = {
+          Version: '2012-10-17',
+          Statement: statements
+        };
+        onChange?.(policy);
+      }, [selectedResources, resourceSelections]);
 
       const containerStyle = layout === 'horizontal' || (layout === 'responsive' && window.innerWidth > 768)
         ? { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }
         : { display: 'flex', flexDirection: 'column', gap: '1rem' };
-      
-      const resolvedActions = selectedActions.length > 0 ? resolveDependencies(selectedActions, selectedResource) : [];
-      const policyToShow = resolvedActions.length > 0 && selectedArn ? {
-        Version: '2012-10-17',
-        Statement: [{
-          Effect: 'Allow',
-          Action: resolvedActions,
-          Resource: selectedArn
-        }]
-      } : { Version: '2012-10-17', Statement: [] };
+
+      // Generate policy for display
+      const generateDisplayPolicy = () => {
+        const statements = [];
+        const actionsWithoutArn = [];
+        
+        selectedResources.forEach(resourceId => {
+          const selection = resourceSelections[resourceId];
+          if (!selection || selection.actions.length === 0) return;
+          
+          const resolvedActions = resolveDependencies(selection.actions, resourceId);
+          
+          if (selection.arn) {
+            statements.push({
+              Effect: 'Allow',
+              Action: resolvedActions,
+              Resource: selection.arn
+            });
+          } else {
+            actionsWithoutArn.push(...resolvedActions);
+          }
+        });
+        
+        if (actionsWithoutArn.length > 0) {
+          statements.push({
+            Effect: 'Allow',
+            Action: [...new Set(actionsWithoutArn)].sort(),
+            Resource: '*'
+          });
+        }
+        
+        return {
+          Version: '2012-10-17',
+          Statement: statements
+        };
+      };
+
+      const policyToShow = generateDisplayPolicy();
 
       return (
         <div className={`awspirin-policy-generator theme-${theme}`} style={containerStyle}>
           {/* Resource Selection */}
           <div style={{ padding: '1.5rem', background: '#f8f9fa', borderRadius: '8px' }}>
-            <h3 style={{ margin: '0 0 1rem 0', color: '#2c3e50' }}>1. Select AWS Resource</h3>
+            <h3 style={{ margin: '0 0 1rem 0', color: '#2c3e50' }}>1. Select AWS Resources</h3>
             {resources.map(resource => (
               <div key={resource.id} style={{ marginBottom: '0.5rem' }}>
                 <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                   <input
-                    type="radio"
-                    name="resource"
+                    type="checkbox"
                     value={resource.id}
-                    checked={selectedResource === resource.id}
-                    onChange={(e) => setSelectedResource(e.target.value)}
+                    checked={selectedResources.includes(resource.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedResources([...selectedResources, resource.id]);
+                        setResourceSelections({
+                          ...resourceSelections,
+                          [resource.id]: { actions: [], arn: '' }
+                        });
+                      } else {
+                        setSelectedResources(selectedResources.filter(id => id !== resource.id));
+                        const newSelections = { ...resourceSelections };
+                        delete newSelections[resource.id];
+                        setResourceSelections(newSelections);
+                      }
+                    }}
                     style={{ marginRight: '0.5rem' }}
                   />
                   <span>{resource.name} ({resource.service})</span>
@@ -273,73 +329,113 @@
 
           {/* Action Selection */}
           <div style={{ padding: '1.5rem', background: '#f8f9fa', borderRadius: '8px' }}>
-            <h3 style={{ margin: '0 0 1rem 0', color: '#2c3e50' }}>2. Select Actions</h3>
-            {selectedResource ? (
-              <>
-                <div style={{ marginBottom: '1rem' }}>
-                  <h4 style={{ margin: '0 0 0.5rem 0', color: '#34495e' }}>Resource ARN</h4>
-                  
-                  {showInput && (
-                    <input
-                      type="text"
-                      placeholder={`arn:aws:${selectedResource}:region:account:resource`}
-                      value={selectedArn}
-                      onChange={(e) => setSelectedArn(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.5rem',
-                        border: '1px solid #dee2e6',
-                        borderRadius: '4px',
-                        marginBottom: showDropdown ? '0.5rem' : '0'
-                      }}
-                    />
-                  )}
-                  
-                  {showDropdown && filteredArns.length > 0 && (
-                    <select
-                      value={selectedArn}
-                      onChange={(e) => setSelectedArn(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.5rem',
-                        border: '1px solid #dee2e6',
-                        borderRadius: '4px'
-                      }}
-                    >
-                      <option value="">Select an ARN...</option>
-                      {filteredArns.map(arn => (
-                        <option key={arn.arn} value={arn.arn}>
-                          {arn.displayName} - {arn.arn}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
+            <h3 style={{ margin: '0 0 1rem 0', color: '#2c3e50' }}>2. Configure Actions & ARNs</h3>
+            {selectedResources.length > 0 ? (
+              selectedResources.map(resourceId => {
+                const resource = resources.find(r => r.id === resourceId);
+                const selection = resourceSelections[resourceId] || { actions: [], arn: '' };
+                const filteredArns = arnList.filter(arn => arn.service === resource.service);
+                const showDropdown = (arnInputMode === 'dropdown' || arnInputMode === 'both' || 
+                                     (arnInputMode === 'auto' && filteredArns.length > 0));
+                const showInput = (arnInputMode === 'input' || arnInputMode === 'both' || 
+                                  (arnInputMode === 'auto' && filteredArns.length === 0));
+                
+                return (
+                  <div key={resourceId} style={{ 
+                    marginBottom: '2rem', 
+                    padding: '1rem', 
+                    background: 'white', 
+                    borderRadius: '6px',
+                    border: '1px solid #dee2e6'
+                  }}>
+                    <h4 style={{ margin: '0 0 1rem 0', color: '#2c3e50' }}>
+                      {resource.name} ({resource.service})
+                    </h4>
+                    
+                    {/* ARN Input/Dropdown */}
+                    <div style={{ marginBottom: '1rem' }}>
+                      <h5 style={{ margin: '0 0 0.5rem 0', color: '#34495e', fontSize: '0.9rem' }}>Resource ARN</h5>
+                      
+                      {showInput && (
+                        <input
+                          type="text"
+                          placeholder={`arn:aws:${resource.service}:region:account:resource`}
+                          value={selection.arn}
+                          onChange={(e) => {
+                            setResourceSelections({
+                              ...resourceSelections,
+                              [resourceId]: { ...selection, arn: e.target.value }
+                            });
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '4px',
+                            marginBottom: showDropdown ? '0.5rem' : '0',
+                            fontSize: '0.85rem'
+                          }}
+                        />
+                      )}
+                      
+                      {showDropdown && filteredArns.length > 0 && (
+                        <select
+                          value={selection.arn}
+                          onChange={(e) => {
+                            setResourceSelections({
+                              ...resourceSelections,
+                              [resourceId]: { ...selection, arn: e.target.value }
+                            });
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '4px',
+                            fontSize: '0.85rem'
+                          }}
+                        >
+                          <option value="">Select an ARN...</option>
+                          {filteredArns.map(arn => (
+                            <option key={arn.arn} value={arn.arn}>
+                              {arn.displayName} - {arn.arn}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
 
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#34495e' }}>Actions</h4>
-                {actions[selectedResource]?.map(action => (
-                  <div key={action} style={{ marginBottom: '0.5rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                      <input
-                        type="checkbox"
-                        value={action}
-                        checked={selectedActions.includes(action)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedActions([...selectedActions, action]);
-                          } else {
-                            setSelectedActions(selectedActions.filter(a => a !== action));
-                          }
-                        }}
-                        style={{ marginRight: '0.5rem' }}
-                      />
-                      <span>{action}</span>
-                    </label>
+                    {/* Actions */}
+                    <h5 style={{ margin: '0 0 0.5rem 0', color: '#34495e', fontSize: '0.9rem' }}>Actions</h5>
+                    <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                      {actions[resourceId]?.map(action => (
+                        <div key={action} style={{ marginBottom: '0.25rem' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.9rem' }}>
+                            <input
+                              type="checkbox"
+                              value={action}
+                              checked={selection.actions.includes(action)}
+                              onChange={(e) => {
+                                const newActions = e.target.checked 
+                                  ? [...selection.actions, action]
+                                  : selection.actions.filter(a => a !== action);
+                                setResourceSelections({
+                                  ...resourceSelections,
+                                  [resourceId]: { ...selection, actions: newActions }
+                                });
+                              }}
+                              style={{ marginRight: '0.5rem' }}
+                            />
+                            <span>{action}</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </>
+                );
+              })
             ) : (
-              <p style={{ color: '#7f8c8d' }}>Please select a resource first</p>
+              <p style={{ color: '#7f8c8d' }}>Please select one or more resources first</p>
             )}
           </div>
 
