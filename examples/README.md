@@ -69,5 +69,5 @@ npx http-server
 ## 🔗 관련 링크
 
 - [라이브러리 소스코드](../)
-- [NPM 패키지](https://www.npmjs.com/package/@awspirin/policy-generator)
+- [NPM 패키지](https://www.npmjs.com/package/@awspirin/awspirin-lib)
 - [GitHub 저장소](https://github.com/raccoonyy/awspirin-lib)

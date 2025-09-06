@@ -76,7 +76,7 @@ export function PolicyGenerator({
   const policyValid = policy.Statement.length <= maxStatements;
 
   const containerClasses = [
-    'awspirin-policy-generator',
+    'awspirin-lib',
     `theme-${theme}`,
     `layout-${currentLayout}`,
     className,
@@ -97,7 +97,7 @@ export function PolicyGenerator({
           onDeselect={deselectResource}
           searchable
           groupBy="category"
-          className="policy-generator-resource-selector"
+          className="awspirin-lib-resource-selector"
         />
       </div>
 
@@ -118,7 +118,7 @@ export function PolicyGenerator({
             onARNSelect={(arn) => handleARNChange(currentSelection.resourceId, arn)}
             arnInputMode={arnInputMode}
             showDependencies
-            className="policy-generator-action-selector"
+            className="awspirin-lib-action-selector"
           />
         ) : (
           <div className="no-resource-selected" style={styles.placeholder}>
@@ -135,7 +135,7 @@ export function PolicyGenerator({
           syntaxHighlight
           copyable
           downloadable
-          className="policy-generator-preview"
+          className="awspirin-lib-preview"
         />
 
         {!policyValid && (

@@ -1,5 +1,5 @@
 {
-  "name": "@awspirin/policy-generator",
+  "name": "awspirin-lib",
   "version": "0.1.0",
   "description": "AWS IAM Policy Generator Component Library - Drop-in React components for AWS policy generation",
   "main": "./dist/index.js",
@@ -39,6 +39,14 @@
   ],
   "author": "AWSpirin Team",
   "license": "MIT",
+  "homepage": "https://raccoonyy.github.io/awspirin-lib",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raccoonyy/awspirin-lib.git"
+  },
+  "bugs": {
+    "url": "https://github.com/raccoonyy/awspirin-lib/issues"
+  },
   "peerDependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
@@ -84,6 +92,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/awspirin/policy-generator"
+    "url": "https://github.com/raccoonyy/awspirin-lib"
   }
 }

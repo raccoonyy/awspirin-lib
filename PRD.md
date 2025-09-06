@@ -19,7 +19,7 @@ Transform the AWSpirin policy generator into a modular, embeddable component lib
 ## 2. Product Overview
 
 ### 2.1 Library Name
-`@awspirin/policy-generator` - AWS IAM Policy Generator Components
+`@awspirin/awspirin-lib` - AWS IAM Policy Generator Components
 
 ### 2.2 Key Features
 1. **Complete Policy Generator Widget** - Single component with full UI
@@ -33,7 +33,7 @@ Transform the AWSpirin policy generator into a modular, embeddable component lib
 
 ### 3.1 Package Structure
 ```
-@awspirin/policy-generator
+@awspirin/awspirin-lib
 ├── core/                 # Headless logic layer
 ├── components/          # React UI components
 ├── hooks/              # React hooks for policy logic
@@ -299,7 +299,7 @@ interface ARNItem {
 
 #### Without ARN List (Default Input Mode)
 ```typescript
-import { PolicyGenerator } from '@awspirin/policy-generator';
+import { PolicyGenerator } from '@awspirin/awspirin-lib';
 
 function App() {
   return (
@@ -314,7 +314,7 @@ function App() {
 
 #### With ARN List (Automatic Dropdown Mode)
 ```typescript
-import { PolicyGenerator } from '@awspirin/policy-generator';
+import { PolicyGenerator } from '@awspirin/awspirin-lib';
 
 function App() {
   const myARNs = [
@@ -341,7 +341,7 @@ import {
   ActionSelector, 
   PolicyPreview,
   usePolicyGenerator 
-} from '@awspirin/policy-generator';
+} from '@awspirin/awspirin-lib';
 
 function CustomPolicyBuilder() {
   const { resources, policy, selectResource } = usePolicyGenerator();
@@ -361,7 +361,7 @@ function CustomPolicyBuilder() {
 
 ### 8.3 Headless Usage
 ```typescript
-import { PolicyCore } from '@awspirin/policy-generator/core';
+import { PolicyCore } from '@awspirin/awspirin-lib/core';
 
 const policyGen = new PolicyCore();
 policyGen.addResource('s3');

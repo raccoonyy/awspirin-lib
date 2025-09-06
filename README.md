@@ -1,13 +1,14 @@
-# @awspirin/policy-generator
+# @awspirin/awspirin-lib
 
-[![npm version](https://badge.fury.io/js/@awspirin%2Fpolicy-generator.svg)](https://www.npmjs.com/package/@awspirin/policy-generator)
+[![npm version](https://badge.fury.io/js/@awspirin.svg)](https://www.npmjs.com/package/@awspirin-lib/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 AWS IAM Policy Generator Component Library - Drop-in React components for AWS policy generation with ARN dropdown support and responsive design.
 
 ## 🚀 Live Demo
 
-**[View Live Examples →](https://raccoonyy.github.io/awspirin-lib)**
+**[View Live Example →](https://raccoonyy.github.io/awspirin)**
+**[Other Examples →](https://raccoonyy.github.io/awspirin-lib)**
 
 Try out all the features including ARN dropdown, dependency resolution, responsive layouts, and multi-language support in your browser.
 
@@ -22,12 +23,11 @@ Try out all the features including ARN dropdown, dependency resolution, responsi
 🌐 **Internationalization** - Multi-language support (EN, KO, JA, ZH)
 📊 **YAML Dependencies** - Maintainable dependency definitions
 🔧 **TypeScript First** - Full type safety and excellent developer experience
-📦 **Multiple Formats** - JSON, YAML, and Terraform output
 
 ## Installation
 
 ```bash
-npm install @awspirin/policy-generator
+npm install @awspirin/awspirin-lib
 ```
 
 ## Quick Start
@@ -36,7 +36,7 @@ npm install @awspirin/policy-generator
 
 ```tsx
 import React from 'react';
-import { PolicyGenerator, ARNItem } from '@awspirin/policy-generator';
+import { PolicyGenerator, ARNItem } from '@awspirin/awspirin-lib';
 
 function App() {
   // Your ARN list - when provided, automatically enables dropdown mode
@@ -71,7 +71,7 @@ function App() {
 ### Without ARN List (Traditional Input Mode)
 
 ```tsx
-import { PolicyGenerator } from '@awspirin/policy-generator';
+import { PolicyGenerator } from '@awspirin/awspirin-lib';
 
 // When no arnList is provided, falls back to traditional ARN input
 <PolicyGenerator
@@ -88,7 +88,6 @@ The library provides intelligent ARN management:
 - **Auto Mode**: Automatically shows dropdown when ARNs are available, input field otherwise
 - **Service Filtering**: Only shows ARNs matching the selected AWS service
 - **Resource Type Filtering**: Further filters by resource type when available
-- **Searchable**: Users can search through large ARN lists
 - **Fallback**: Gracefully falls back to input mode when no matching ARNs found
 
 ### ARN Input Modes
@@ -130,7 +129,7 @@ import {
   PolicyPreview,
   usePolicyGenerator,
   sampleResources
-} from '@awspirin/policy-generator';
+} from '@awspirin/awspirin-lib';
 
 function CustomPolicyBuilder() {
   const {
@@ -170,7 +169,7 @@ function CustomPolicyBuilder() {
 Use the core logic without React components:
 
 ```tsx
-import { PolicyCore } from '@awspirin/policy-generator/core';
+import { PolicyCore } from '@awspirin/awspirin-lib/core';
 
 const policyGen = new PolicyCore();
 
@@ -262,11 +261,11 @@ interface ARNItem {
 
 ## Examples
 
-Check out the [examples](./examples) directory for complete examples:
+Check out the [examples](https://raccoonyy.github.io/awspirin-lib/) directory for complete examples:
 
-- [Basic Usage](./examples/basic-usage.tsx) - Simple PolicyGenerator with ARN dropdown
-- [Custom Layout](./examples/custom-layout.tsx) - Using individual components
-- [Headless Usage](./examples/headless-usage.ts) - Core logic without React
+- [Basic Usage](https://raccoonyy.github.io/awspirin-lib/basic-example.html) - Simple PolicyGenerator with ARN dropdown
+- [Headless Usage](https://raccoonyy.github.io/awspirin-lib/headless-demo.html) - Core logic without React
+- [Multi-language Usage][https://raccoonyy.github.io/awspirin-lib/i18n-demo.html] - Supported Languages are: English, Chinese, Japanese, Korean
 
 ## Development
 
@@ -300,13 +299,11 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## License
 
-MIT © [AWSpirin Team](https://github.com/awspirin)
+MIT © [AWSpirin Team](https://github.com/raccoonyy/awspirin-lib)
 
 ## Support
 
-- 📖 [Documentation](https://docs.awspirin.com)
-- 🐛 [Issue Tracker](https://github.com/awspirin/policy-generator/issues)
-- 💬 [Discussions](https://github.com/awspirin/policy-generator/discussions)
+- 🐛 [Issue Tracker](https://github.com/raccoonyy/awspirin-lib/issues)
 
 ---
 
